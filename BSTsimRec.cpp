@@ -5,175 +5,42 @@
 
 using namespace std;
 
-bst::node::node(int x)
+
+void bst::InOrderTrav()//Initiates the traversal 
 {
-    value = x;
-    left = nullptr;
-    right = nullptr;
+    InOrderRecursion(root);
 }
 
-bst::bst()
+void bst::InOrderRecursion(node *nodePntr)//prints on screen the in-order traversal 
 {
-    root = nullptr;
-}
-
-bst::~bst()
-{
-    if(root)
+    if(nodePntr->left)
     {
-        Erase(root);
+        InOrderTest(nodePntr->left);
     }
-}
+    
+    cout<<nodePntr->value<<"\n";
 
-bool bst::Add(int x)
-{
-    if(root)
+    if(nodePntr->right)
     {
-        return FindLoc(x,root);
-    }
-    else
-    {
-        root = new node(x);
-        return true;
+        InOrderTest(nodePntr->right);
     }
 }
 
-bool bst::Remove(int x)
+void bst::InOrder()//Simulates recursion for an in-order traversal 
 {
-    node* reader = nullptr;
-    node* thisRoot = root;
-    bool done = false;
-
-    while(thisRoot && !done)
-    {
-        if(x<thisRoot->value)
-        {
-            reader = thisRoot;
-            thisRoot=thisRoot->left;
-        }
-        else if(x>thisRoot->value)
-        {
-            reader = thisRoot;
-            thisRoot=thisRoot->right;
-        }
-        else
-        {
-            done = true;
-        }
-    }
-
-    if(thisRoot)//if the node was found
-    {
-        if(thisRoot->left && thisRoot->right)//node has 2 children
-        {
-
-            node* valFinder;
-            valFinder = thisRoot->right;
-            while(valFinder->left)
-            {
-                valFinder=valFinder->left;
-            }
-            int swapVal = valFinder->value;
-            Remove(swapVal);
-
-            thisRoot->value = swapVal;
-        }
-        else if(thisRoot->left)//if node has a left child
-        {
-            if(x<reader->value)
-            {
-                reader->left = thisRoot->left;
-                delete thisRoot;
-
-            }
-            else
-            {
-                reader->right = thisRoot->left;
-                delete thisRoot;
-
-            }
-        }
-        else if(thisRoot->right)//if node has a right child
-        {
-            if(x<reader->value)
-            {
-                reader->left = thisRoot->right;
-                delete thisRoot;
-
-            }
-            else
-            {
-                reader->right = thisRoot->right;
-                delete thisRoot;
-
-            }
-        }
-        else//node has 0 children
-        {
-            delete thisRoot;
-            if(x<reader->value)
-            {
-                reader->left = nullptr;
-            }
-            else
-            {
-                reader->right = nullptr;
-            }
-
-        }
-    return true;
-    }
-    else
-    {
-        return false; //the node was not found
-    }
-}
-
-bool bst::Search(int x)
-{
-    node* thisRoot= root;
-    while(thisRoot)
-    {
-        if(x<thisRoot->value)
-        {
-            thisRoot=thisRoot->left;
-        }
-        else if(x>thisRoot->value)
-        {
-            thisRoot=thisRoot->right;
-        }
-        else
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void bst::Clear()
-{
-    if(root)
-    {
-       Erase(root);
-    }
-    root=nullptr;
-}
-
-void bst::InOrder()
-{
-    stack<node*> pointerStack;
+    stack<node*> pointerStack;//a stack is used to keep nodes we want to return to later
     node *nodePntr = root;
 
     do
     {
         pointerStack.push(nodePntr);
-        if(nodePntr->left)
+        if(nodePntr->left)//for any subtree, we want to first process the left-most node. So we traverse left while adding nodes to the top of the stack
         {
             nodePntr=nodePntr->left;
         }
         else
         {
-            do
+            do//when there is no left node we need to back track through the stack, popping off nodes (and processing their data) until we find a node with a right node
             {
                 if(!pointerStack.empty())
                 {
@@ -188,13 +55,34 @@ void bst::InOrder()
             }
             while(!nodePntr->right);
 
-            nodePntr=nodePntr->right;
+            nodePntr=nodePntr->right;//Either we will repeat the process with a right node, or we broke out of the sub-loop because the stack was empty, in which case we are done (nodePntr=nullptr)
         }
     }
     while(nodePntr!=nullptr);
 }
 
-void bst::PreOrder()
+void bst::PreOrderTrav()//Initiates the traversal 
+{
+    PreOrderRecursion(root);
+}
+
+void bst::PreOrderRecursion(node *nodePntr)//prints on screen the pre-order traversal 
+{
+    cout<<nodePntr->value<<"\n";
+    
+    if(nodePntr->left)
+    {
+        PreOrderTest(nodePntr->left);
+    }
+    
+    if(nodePntr->right)
+    {
+        PreOrderTest(nodePntr->right);
+    }
+}
+
+
+void bst::PreOrder()//Simulates recursion for an pre-order traversal 
 {
     stack<node*> pointerStack;
     node *nodePntr = root;
@@ -202,7 +90,7 @@ void bst::PreOrder()
     do
     {
         pointerStack.push(nodePntr);
-        cout<<nodePntr->value<<"\n";
+        cout<<nodePntr->value<<"\n";//for pre-order traversals, processing the data occurs when nodes are added to the stack 
         if(nodePntr->left)
         {
             nodePntr=nodePntr->left;
@@ -227,97 +115,6 @@ void bst::PreOrder()
         }
     }
     while(nodePntr!=nullptr);
-}
-
-void bst::InOrderTrav()
-{
-    InOrderTest(root);
-}
-
-void bst::InOrderTest(node *nodePntr)
-{
-
-    cout<<nodePntr->value<<"\n";
-    if(nodePntr->left)
-    {
-        InOrderTest(nodePntr->left);
-    }
-
-
-    if(nodePntr->right)
-    {
-        InOrderTest(nodePntr->right);
-    }
-}
-
-bool bst::FindLoc(int x, node* thisRoot)//Only called when root is non-null
-{
-    node* reader = nullptr;
-    while(thisRoot)
-    {
-        if(x<thisRoot->value)
-        {
-            reader = thisRoot;
-            thisRoot=thisRoot->left;
-        }
-        else if(x>thisRoot->value)
-        {
-            reader = thisRoot;
-            thisRoot=thisRoot->right;
-        }
-        else if(x==thisRoot->value)
-        {
-            return false;
-        }
-    }
-    if(x<reader->value)
-    {
-        reader->left=new node(x);
-    }
-    else
-    {
-        reader->right=new node(x);
-    }
-
-    return true;
-}
-
-void bst::Erase(node* thisRoot)
-{
-    if(thisRoot->left)
-    {
-        Erase(thisRoot->left);
-    }
-    if(thisRoot->right)
-    {
-        Erase(thisRoot->right);
-    }
-
-    delete thisRoot;
-}
-
-int main()
-{
-    bst p;
-//    for(int i=0; i<10000000; i++)
-//    {
-//        p.Add(rand()%10000000);
-//    }
-
-//
-    p.Add(5);
-    p.Add(78);
-    p.Add(81);
-    p.Add(2);
-    p.Add(21);
- p.Add(1);
-  p.Add(3);
- p.Add(-11);
-  p.Add(-112);
-    p.Add(16612);
-      p.Add(145612);
-    p.InOrder();
-    p.PreOrder();
 }
 
 
